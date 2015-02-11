@@ -156,8 +156,8 @@ def fcbf(X, y, thresh):
 		thresh = np.median(slist[-1,0])
 		print "Using minimum SU value as default threshold: {0}".format(thresh)
 	elif thresh > max(slist[:,0]):
-		print "No relevant features selected for given threshold. \
-				Please lower the threshold and try again."
+		print "No relevant features selected for given threshold."
+		print "Please lower the threshold and try again."
 		exit()
 		
 	slist = slist[slist[:,0]>thresh,:]
@@ -253,7 +253,7 @@ def main():
 	## ================= PARAMS =================
 	inpath = '../data/lungcancer.csv'
 	delim = ','
-	thresh = -1 # Negative value => minimum SU
+	thresh = 2 # Negative value => minimum SU
 	header = False
 	classAt = -1 # -1: last, otherwise: 0-based index of class
 	## ==========================================
