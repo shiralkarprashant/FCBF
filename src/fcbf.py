@@ -213,13 +213,14 @@ def fcbf_wrapper(inpath, thresh, delim=',', header=False, classAt=-1):
 		try:
 			print "Reading file. Please wait ..."
 			if header:
-				d = np.loadtxt(inpath, delimiter=delim, skiprows=1)
+				d = np.genfromtxt(inpath, delimiter=str(delim), skip_header=1)
 			else:
 				d = np.loadtxt(inpath, delimiter=delim)
 			print "Success! Dimensions: {0} x {1}".format(d.shape[0], d.shape[1])
 		except Exception, e:
 			print "Input file loading failed. Please check the file."
 			print "Error:", e
+			raise e
 			exit()
 		
 		if classAt == -1:
@@ -251,14 +252,14 @@ def fcbf_wrapper(inpath, thresh, delim=',', header=False, classAt=-1):
 	
 def main():
 	## ================= PARAMS =================
-	inpath = '../data/lungcancer.csv'
-	delim = ','
+	inpath = '../data/bot_online_dataset.dat'
+	delim = '\t'
 	thresh = -1 # Negative value => minimum SU
-	header = False
+	header = True
 	classAt = -1 # -1: last, otherwise: 0-based index of class
 	## ==========================================
-		
-	fcbf_wrapper(inpath, thresh, delim, header, classAt)
+	
+	fcbf_wrapper(os.path.abspath(inpath), thresh, delim, header, classAt)
 
 if __name__ == '__main__':
 	if len(sys.argv) == 1:
@@ -278,5 +279,6 @@ if __name__ == '__main__':
 							
 		args = parser.parse_args()
 		
-		fcbf_wrapper(args.inpath, args.thresh, args.delim, args.header, args.classAt)
+		fcbf_wrapper(os.path.abspath(args.inpath), args.thresh, \
+					args.delim.decode('string_escape'), args.header, args.classAt)
 		
