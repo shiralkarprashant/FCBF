@@ -13,6 +13,7 @@ Usage:
   
   From command line, 
     > python fcbf.py -h
+    
     usage: fcbf.py [-h] [-inpath] [-thresh] [-delim] [-header] [-classAt]
     
     Fast Correlation-Based Feature Selection (FCBF)
