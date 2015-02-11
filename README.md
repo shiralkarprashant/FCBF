@@ -7,7 +7,9 @@ Implementation of the FCBF algorithm.
 
 Usage: 
 
-  In Python, call fcbf_wrapper(inpath, thresh, delim=',', header=False, classAt=-1)
+  In Python, call 
+  
+    fcbf_wrapper(inpath, thresh, delim=',', header=False, classAt=-1)
   
   OR
   
