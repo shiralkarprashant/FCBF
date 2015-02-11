@@ -127,7 +127,7 @@ def c_correlation(X, y):
 
 def fcbf(X, y, thresh):
 	"""
-	Perform Fast Correlation-Based Feature selection (FCBF).
+	Perform Fast Correlation-Based Filter solution (FCBF).
 	
 	Parameters:
 	-----------
@@ -264,7 +264,7 @@ if __name__ == '__main__':
 	if len(sys.argv) == 1:
 		main()
 	else:
-		parser = argparse.ArgumentParser(description='Fast Correlation-Based Feature Selection (FCBF)')
+		parser = argparse.ArgumentParser(description='Fast Correlation-Based Filter Selection (FCBF)')
 		parser.add_argument('-inpath', metavar='', type=str, \
 							dest='inpath', help='Path to input file')
 		parser.add_argument('-thresh', metavar='', type=float, \

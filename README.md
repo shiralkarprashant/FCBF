@@ -1,4 +1,4 @@
-Fast Correlation-Based Feature (FCBF) selection.
+Fast Correlation-Based Filter (FCBF) selection.
 ====
 
 Paper: http://www.public.asu.edu/~huanliu/papers/icml03.pdf
@@ -18,7 +18,7 @@ Usage:
     > python fcbf.py -h
     usage: fcbf.py [-h] [-inpath] [-thresh] [-delim] [-header] [-classAt]
     
-    Fast Correlation-Based Feature Selection (FCBF)
+    Fast Correlation-Based Filter Selection (FCBF)
     
     optional arguments:
       -h, --help  show this help message and exit
