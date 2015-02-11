@@ -14,7 +14,6 @@ Filter Solution. Yu & Liu (ICML 2003)
 import sys
 import os
 import numpy as np
-import time
 
 def entropy(vec, base=2):
 	" Returns the empirical entropy H(X) in the input vector."
@@ -40,11 +39,13 @@ def mutual_information(x, y):
 	return entropy(x) - conditional_entropy(x, y)
 
 def symmetrical_uncertainty(x, y):
-	" Returns 'symmetrical uncertainty' - a symmetric mutual information measure."
+	" Returns 'symmetrical uncertainty' (SU) - a symmetric mutual information measure."
 	return 2.0*mutual_information(x, y)/(entropy(x) + entropy(y))
 
 def getFirstElement(d):
-	"""Returns tuple corresponding to first 'unconsidered' feature
+	"""
+	Returns tuple corresponding to first 'unconsidered' feature
+	
 	Parameters:
 	----------
 	d : ndarray
@@ -62,7 +63,9 @@ def getFirstElement(d):
 	return None, None, None
 
 def getNextElement(d, idx):
-	"""Returns tuple corresponding to the next 'unconsidered' feature
+	"""
+	Returns tuple corresponding to the next 'unconsidered' feature.
+	
 	Parameters:
 	-----------
 	d : ndarray
@@ -82,7 +85,9 @@ def getNextElement(d, idx):
 	return None, None, None
 	
 def removeElement(d, idx):
-	"""Returns data with requested feature removed.
+	"""
+	Returns data with requested feature removed.
+	
 	Parameters:
 	-----------
 	d : ndarray
@@ -98,30 +103,72 @@ def removeElement(d, idx):
 	d[idx,2] = 0
 	return d
 
+def c_correlation(X, y):
+	"""
+	Returns SU values between each feature and class.
+	
+	Parameters:
+	-----------
+	X : 2-D ndarray
+		Feature matrix.
+	y : ndarray
+		Class label vector
+		
+	Returns:
+	--------
+	su : ndarray
+		Symmetric Uncertainty (SU) values for each feature.
+	"""
+	su = np.zeros(X.shape[1])
+	for i in np.arange(X.shape[1]):
+		su[i] = symmetrical_uncertainty(X[:,i], y)
+	return su
+
 def fcbf(X, y, thresh):
+	"""
+	Perform Fast Correlation-Based Feature selection (FCBF).
+	
+	Parameters:
+	-----------
+	X : 2-D ndarray
+		Feature matrix
+	y : ndarray
+		Class label vector
+	thresh : float
+		A value in [0,1) used as threshold for selecting 'relevant' features. 
+		A negative value suggest the use of minimum SU[i,c] value as threshold.
+	
+	Returns:
+	--------
+	sbest : 2-D ndarray
+		An array containing SU[i,c] values and feature index i.
+	"""
 	n = X.shape[1]
 	slist = np.zeros((n, 3))
 	slist[:, -1] = 1
 
 	# identify relevant features
-	t1 = time.time()
-	for i in xrange(n):
-		slist[i,0] = symmetrical_uncertainty(X[:,i], y)
-	print "Time for SU[i,c]: {0}".format(time.time()-t1)
+	slist[:,0] = c_correlation(X, y) # compute 'C-correlation'
 	idx = slist[:,0].argsort()[::-1]
 	slist = slist[idx, ]
 	slist[:,1] = idx
+	if thresh < 0:
+		thresh = np.median(slist[-1,0])
+		print "Using minimum SU value as default threshold: {0}".format(thresh)
+	elif thresh > max(slist[:,0]):
+		print "No relevant features selected for given threshold. \
+				Please lower the threshold and try again."
+		exit()
+		
 	slist = slist[slist[:,0]>thresh,:]
-	print "Ordered:\n", slist
+	print "\nOrdered:\n", slist
 	
 	# identify redundant features among the relevant ones
 	cache = {}
 	m = len(slist)
 	p_su, p, p_idx = getFirstElement(slist)
-	print "First:", p_su, p, p_idx
 	for i in xrange(m):
 		q_su, q, q_idx = getNextElement(slist, p_idx)
-		print "Outer q:", q_su, q, q_idx
 		if q:
 			while q:
 				if (p, q) in cache:
@@ -129,48 +176,89 @@ def fcbf(X, y, thresh):
 				else:
 					pq_su = symmetrical_uncertainty(X[:,p], X[:,q])
 					cache[(p,q)] = pq_su
-				print pq_su, (pq_su >= q_su)
+
 				if pq_su >= q_su:
 					slist = removeElement(slist, q_idx)
-					# print slist
 				q_su, q, q_idx = getNextElement(slist, q_idx)
-				print "Inner q:", q_su, q, q_idx
+				
 		p_su, p, p_idx = getNextElement(slist, p_idx)
-		print "Next p:", p_su, p, p_idx
-		print "========================="
 		if not p_idx:
 			break
 	
-	print "\nFinal:\n", slist
-	return slist[slist[:,2]>0, :2]
+	sbest = slist[slist[:,2]>0, :2]
+	return sbest
+
+def fcbf_wrapper(inpath, thresh, delim=',', header=False, classAt=-1):
+	"""
+	Main function call to perform FCBF selection. Saves Symmetric Uncertainty (SU)
+	values and 0-based indices of selected features to a CSV file at the same location
+	as input file, with 'feature_' as prefix. e.g. 'feature_pima.csv' for 'pima.csv'.
 	
-def main():
-	## ================= PARAMS =================
-	fname = '../data/bot_online_dataset.dat'
-	delim = '\t'
-	thresh = 0.01
-	header = True
-	## ==========================================
-	if os.path.exists(fname):
+	Parameters:
+	-----------
+	inpath : str
+		Path containing training set.
+	thresh : float
+		A value in [0,1) used as threshold for selecting 'relevant' features. 
+		A negative value suggest the use of minimum SU[i,c] value as threshold.
+	delim : str
+		Character to be used to delimit input file. defaults to ','
+	header : bool
+		Whether the input file contains a header line. default to False.
+	classAt : int
+		0-based index of the class vector in the file. A value of -1 (default) 
+		suggest to use last column.
+	"""
+	if os.path.exists(inpath):
 		try:
 			print "Reading file. Please wait ..."
 			if header:
-				d = np.loadtxt(fname, delimiter=delim, skiprows=1)
+				d = np.loadtxt(inpath, delimiter=delim, skiprows=1)
 			else:
-				d = np.loadtxt(fname, delimiter=delim)
+				d = np.loadtxt(inpath, delimiter=delim)
+			print "Success! Dimensions: {0} x {1}".format(d.shape[0], d.shape[1])
 		except Exception, e:
 			print "Input file loading failed. Please check the file."
-			raise e
-		print "File read successfully. Dimensions: {0} x {1}".format(d.shape[0], d.shape[1])
+			print "Error:", e
+			exit()
 		
-		X = d[:, :d.shape[1]-1]
-		y = d[:,-1]
+		if classAt == -1:
+			X = d[:, :d.shape[1]-1]
+			y = d[:,-1]
+		else:
+			idx = np.arange(d.shape[1])
+			X = d[:, idx[idx != classAt]]
+			y = d[:, classAt]	
 
-		sbest = fcbf(X, y, thresh)
-		if sbest.shape[0] > 0:
+		try:
+			print "Performing FCBF selection. Please wait ..."
+			sbest = fcbf(X, y, thresh)
+			print "Done!"
 			print "\n#Features selected: {0}".format(len(sbest))
 			print "Selected feature indices:\n{0}".format(sbest)
+			try:
+				outpath = os.path.split(inpath)[0] \
+							+ '/features_' + os.path.split(inpath)[1]
+				np.savetxt(outpath, sbest, fmt="%0.8f,%d", newline="\n", \
+				 			header='SU, 0-based Feature')
+				print "\nFile saved successfully. Path: {0}".format(outpath)
+			except Exception, e:
+				print "Error encountered while saving file:", e
+		except Exception, e:
+			print "Error:", e			
+	else:
+		print "The file you specified does not exist."
+	
+def main():
+	## ================= PARAMS =================
+	inpath = '../data/lungcancer.csv'
+	delim = ','
+	thresh = -1 # Negative value => minimum SU
+	header = False
+	classAt = -1 # -1: last, otherwise: 0-based index of class
+	## ==========================================
 		
+	fcbf_wrapper(inpath, thresh, delim, header, classAt)
 
 if __name__ == '__main__':
 	main()
