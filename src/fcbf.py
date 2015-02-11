@@ -14,6 +14,7 @@ Filter Solution. Yu & Liu (ICML 2003)
 import sys
 import os
 import numpy as np
+import time
 
 def entropy(vec, base=2):
 	" Returns the empirical entropy H(X) in the input vector."
@@ -103,8 +104,10 @@ def fcbf(X, y, thresh):
 	slist[:, -1] = 1
 
 	# identify relevant features
+	t1 = time.time()
 	for i in xrange(n):
 		slist[i,0] = symmetrical_uncertainty(X[:,i], y)
+	print "Time for SU[i,c]: {0}".format(time.time()-t1)
 	idx = slist[:,0].argsort()[::-1]
 	slist = slist[idx, ]
 	slist[:,1] = idx
@@ -142,10 +145,19 @@ def fcbf(X, y, thresh):
 	return slist[slist[:,2]>0, :2]
 	
 def main():
-	fname = '../data/oil.csv'
+	## ================= PARAMS =================
+	fname = '../data/bot_online_dataset.dat'
+	delim = '\t'
+	thresh = 0.01
+	header = True
+	## ==========================================
 	if os.path.exists(fname):
 		try:
-			d = np.loadtxt(fname, delimiter=',')
+			print "Reading file. Please wait ..."
+			if header:
+				d = np.loadtxt(fname, delimiter=delim, skiprows=1)
+			else:
+				d = np.loadtxt(fname, delimiter=delim)
 		except Exception, e:
 			print "Input file loading failed. Please check the file."
 			raise e
@@ -153,8 +165,6 @@ def main():
 		
 		X = d[:, :d.shape[1]-1]
 		y = d[:,-1]
-		thresh = 0.01
-		
 
 		sbest = fcbf(X, y, thresh)
 		if sbest.shape[0] > 0:
