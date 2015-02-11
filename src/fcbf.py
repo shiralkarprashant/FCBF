@@ -13,6 +13,7 @@ Filter Solution. Yu & Liu (ICML 2003)
 
 import sys
 import os
+import argparse
 import numpy as np
 
 def entropy(vec, base=2):
@@ -155,13 +156,12 @@ def fcbf(X, y, thresh):
 	if thresh < 0:
 		thresh = np.median(slist[-1,0])
 		print "Using minimum SU value as default threshold: {0}".format(thresh)
-	elif thresh > max(slist[:,0]):
+	elif thresh >= 1 or thresh > max(slist[:,0]):
 		print "No relevant features selected for given threshold."
 		print "Please lower the threshold and try again."
 		exit()
 		
-	slist = slist[slist[:,0]>thresh,:]
-	print "\nOrdered:\n", slist
+	slist = slist[slist[:,0]>thresh,:] # desc. ordered per SU[i,c]
 	
 	# identify redundant features among the relevant ones
 	cache = {}
@@ -253,7 +253,7 @@ def main():
 	## ================= PARAMS =================
 	inpath = '../data/lungcancer.csv'
 	delim = ','
-	thresh = 2 # Negative value => minimum SU
+	thresh = -1 # Negative value => minimum SU
 	header = False
 	classAt = -1 # -1: last, otherwise: 0-based index of class
 	## ==========================================
@@ -261,5 +261,22 @@ def main():
 	fcbf_wrapper(inpath, thresh, delim, header, classAt)
 
 if __name__ == '__main__':
-	main()
-
+	if len(sys.argv) == 1:
+		main()
+	else:
+		parser = argparse.ArgumentParser(description='Fast Correlation-Based Feature Selection (FCBF)')
+		parser.add_argument('-inpath', metavar='', type=str, \
+							dest='inpath', help='Path to input file')
+		parser.add_argument('-thresh', metavar='', type=float, \
+							dest='thresh', help='SU threshold')
+		parser.add_argument('-delim', metavar='', type=str, \
+							dest='delim',help='File delimiter', default=',')
+		parser.add_argument('-header', metavar='', type=bool, \
+							dest='header',help='Contains header?', default=False)
+		parser.add_argument('-classAt', metavar='', type=int, \
+							dest='classAt',help='Index of class column', default=-1)
+							
+		args = parser.parse_args()
+		
+		fcbf_wrapper(args.inpath, args.thresh, args.delim, args.header, args.classAt)
+		
