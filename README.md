@@ -5,6 +5,10 @@ Paper: http://www.public.asu.edu/~huanliu/papers/icml03.pdf
 
 Implementation of the FCBF algorithm. 
 
+Input file format:
+
+  Row: observation vector, Col: Feature/Variable vector
+
 Usage: 
 
   In Python, call 
