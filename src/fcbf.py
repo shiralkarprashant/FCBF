@@ -169,8 +169,8 @@ def fcbf(X, y, thresh):
 	p_su, p, p_idx = getFirstElement(slist)
 	for i in xrange(m):
 		q_su, q, q_idx = getNextElement(slist, p_idx)
-		if q:
-			while q:
+		if q is not None:
+			while q is not None:
 				if (p, q) in cache:
 					pq_su = cache[(p,q)]
 				else:
