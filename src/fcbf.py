@@ -168,9 +168,11 @@ def fcbf(X, y, thresh):
 	m = len(slist)
 	p_su, p, p_idx = getFirstElement(slist)
 	for i in xrange(m):
+		p = int(p)
 		q_su, q, q_idx = getNextElement(slist, p_idx)
 		if q:
 			while q:
+				q = int(q)
 				if (p, q) in cache:
 					pq_su = cache[(p,q)]
 				else:
@@ -233,6 +235,7 @@ def fcbf_wrapper(inpath, thresh, delim=',', header=False, classAt=-1):
 
 		try:
 			print "Performing FCBF selection. Please wait ..."
+			print 'X: {}, y: {}'.format(X.shape, len(y))
 			sbest = fcbf(X, y, thresh)
 			print "Done!"
 			print "\n#Features selected: {0}".format(len(sbest))
