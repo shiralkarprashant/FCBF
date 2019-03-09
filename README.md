@@ -19,7 +19,7 @@ Usage:
   
   From command line, 
   
-    > python fcbf.py -h
+    > python src/fcbf.py -h
     usage: fcbf.py [-h] [-inpath] [-thresh] [-delim] [-header] [-classAt]
     
     Fast Correlation-Based Filter Selection (FCBF)
@@ -32,7 +32,7 @@ Usage:
       -header     Contains header?
       -classAt    Index of class column
     
-    > python fcbf.py -inpath='../data/lungcancer.csv' -thresh=0.05
+    > python src/fcbf.py -inpath='./data/lungcancer.csv' -thresh=0.05
     Reading file. Please wait ...
     Success! Dimensions: 32 x 57
     Performing FCBF selection. Please wait ...
