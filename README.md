@@ -3,7 +3,7 @@ Fast Correlation-Based Filter (FCBF) selection.
 
 Paper: http://www.public.asu.edu/~huanliu/papers/icml03.pdf
 
-Implementation of the FCBF algorithm. 
+Implementation of the FCBF algorithm. **Requires Python 2.7.**
 
 Input file format:
 
@@ -19,6 +19,7 @@ Usage:
   
   From command line, 
   
+    > cd FCBF
     > python src/fcbf.py -h
     usage: fcbf.py [-h] [-inpath] [-thresh] [-delim] [-header] [-classAt]
     
