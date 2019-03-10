@@ -3,21 +3,26 @@ Fast Correlation-Based Filter (FCBF) selection.
 
 Paper: http://www.public.asu.edu/~huanliu/papers/icml03.pdf
 
-Implementation of the FCBF algorithm. **Requires Python 2.7.**
+Implementation of the FCBF algorithm. 
+
+## System requirements
+
+* Requires Python 2.7
+* Works on Linux and Mac. No guarantees for other OS, but may work.
+
+## Usage
 
 Input file format:
 
   Row: observation vector, Col: Feature/Variable vector
 
-Usage: 
-
-  In Python, call 
+In Python, call 
   
-    fcbf_wrapper(inpath, thresh, delim=',', header=False, classAt=-1)
+    `fcbf_wrapper(inpath, thresh, delim=',', header=False, classAt=-1)`
   
-  OR
+OR
   
-  From command line, 
+From command line, 
   
     > cd FCBF
     > python src/fcbf.py -h
