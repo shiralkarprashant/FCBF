@@ -182,7 +182,7 @@ def fcbf(X, y, thresh):
 	p_su, p_idx, p = getFirstElement(slist)
 	for i in range(m):
 		p = int(p)
-		q_su, q_idx, q = getNextElement(slist, p_idx)
+		q_su, q, q_idx = getNextElement(slist, p_idx)
 		if q:
 			while q:
 				q = int(q)
@@ -232,7 +232,7 @@ def fcbf_wrapper(inpath, thresh, delim=',', header=False, classAt=-1):
 			else:
 				d = np.loadtxt(inpath, delimiter=delim)
 			print("Success! Dimensions: {0} x {1}".format(d.shape[0], d.shape[1]))
-		except Exception, e:
+		except Exception as e:
 			print("Input file loading failed. Please check the file.")
 			print("Error:", e)
 			raise e
@@ -259,9 +259,9 @@ def fcbf_wrapper(inpath, thresh, delim=',', header=False, classAt=-1):
 				np.savetxt(outpath, sbest, fmt="%0.8f,%d", newline="\n", \
 				 			header='SU, 0-based Feature')
 				print("\nFile saved successfully. Path: {0}".format(outpath))
-			except Exception, e:
+			except Exception as e:
 				print("Error encountered while saving file:", e)
-		except Exception, e:
+		except Exception as e:
 			print("Error:", e)			
 	else:
 		print("The file you specified does not exist.")
